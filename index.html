@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Target Sports YYZ — Membership Break-Even Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f2;
+      color: #1a1a18;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    h1 { font-size: 18px; font-weight: 500; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 13px; color: #6b6b66; margin-bottom: 1.5rem; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b6b66;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.75rem;
+    }
+
+    .divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.1); margin: 1.5rem 0; }
+
+    .caliber-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .cal-btn {
+      font-size: 12px;
+      padding: 5px 11px;
+      border: 0.5px solid rgba(0,0,0,0.18);
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      color: #1a1a18;
+      font-family: inherit;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+    }
+
+    .cal-btn.active {
+      background: #e6f1fb;
+      color: #185FA5;
+      border-color: #85b7eb;
+    }
+
+    .ammo-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .ammo-pill {
+      background: #f1efe8;
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+    }
+
+    .ammo-pill .pill-label { color: #6b6b66; margin-bottom: 2px; font-size: 11px; }
+    .ammo-pill .pill-value { font-weight: 500; font-size: 16px; }
+    .ammo-pill .pill-value.member { color: #185FA5; }
+    .ammo-pill .pill-value.nonmember { color: #BA7517; }
+    .ammo-pill .pill-note { font-size: 10px; color: #888780; margin-top: 2px; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 500px) {
+      .controls { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr !important; }
+      .ammo-summary { grid-template-columns: 1fr; }
+    }
+
+    .ctrl { display: flex; flex-direction: column; gap: 6px; }
+
+    .ctrl label {
+      font-size: 13px;
+      color: #6b6b66;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ctrl label span { font-weight: 500; color: #1a1a18; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #d3d1c7;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #185FA5;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(24,95,165,0.4);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #185FA5;
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    .toggle-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+    .toggle-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      border: 0.5px solid rgba(0,0,0,0.18);
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      color: #1a1a18;
+      font-family: inherit;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .toggle-btn.active {
+      background: #e6f1fb;
+      color: #185FA5;
+      border-color: #85b7eb;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card { background: #f1efe8; border-radius: 8px; padding: 0.85rem 1rem; }
+    .card-label { font-size: 12px; color: #6b6b66; margin-bottom: 4px; line-height: 1.3; }
+    .card-value { font-size: 22px; font-weight: 500; color: #185FA5; }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #6b6b66;
+      flex-wrap: wrap;
+    }
+
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .chart-wrap { position: relative; width: 100%; height: 280px; }
+
+    .note {
+      font-size: 12px;
+      color: #888780;
+      line-height: 1.6;
+      margin-top: 1rem;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
+      padding-top: 1rem;
+    }
+
+    .note strong { color: #6b6b66; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Target Sports YYZ — Membership Break-Even</h1>
+  <p class="subtitle">How many rounds per year before membership beats pay-per-visit?</p>
+
+  <div class="section-title">caliber</div>
+  <div class="caliber-row" id="caliber-row"></div>
+
+  <div class="ammo-summary">
+    <div class="ammo-pill">
+      <div class="pill-label">Member ammo (your retail cost)</div>
+      <div class="pill-value member" id="member-ammo-display">$0.50 / round</div>
+      <div class="pill-note">adjust with the slider below</div>
+    </div>
+    <div class="ammo-pill">
+      <div class="pill-label">Non-member ammo (YYZ rate + 10% tip)</div>
+      <div class="pill-value nonmember" id="nm-ammo-display">$1.32 / round</div>
+      <div class="pill-note">fixed per YYZ posted pricing</div>
+    </div>
+  </div>
+
+  <div class="section-title">assumptions</div>
+  <div class="controls">
+    <div class="ctrl">
+      <label>Rounds per session <span id="rps-val">100</span></label>
+      <input type="range" min="25" max="300" step="25" value="100" id="rps">
+    </div>
+    <div class="ctrl">
+      <label>Weekend / holiday visits <span id="wkd-val">70%</span></label>
+      <input type="range" min="0" max="100" step="10" value="70" id="wkd">
+    </div>
+    <div class="ctrl">
+      <label>Your ammo cost (¢/round) <span id="ammo-val">50¢</span></label>
+      <input type="range" id="ammo" min="35" max="70" step="5" value="50">
+    </div>
+    <div class="ctrl">
+      <label>Gun amortized cost ($/yr) <span id="gun-val">$160</span></label>
+      <input type="range" min="0" max="400" step="20" value="160" id="gun">
+    </div>
+  </div>
+
+  <div class="ctrl" style="margin-bottom: 1rem;">
+    <label style="font-size:13px; color:#6b6b66; margin-bottom:6px; display:block;">Membership year</label>
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="yr1-btn" onclick="setYear(1)">Year 1 — $762.75 incl. HST</button>
+      <button class="toggle-btn" id="yr2-btn" onclick="setYear(2)">Renewal — $621.50 incl. HST</button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title">break-even</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Break-even rounds / year</div>
+      <div class="card-value" id="be-rounds">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Break-even sessions / year</div>
+      <div class="card-value" id="be-sessions">—</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Break-even sessions / month</div>
+      <div class="card-value" id="be-month">—</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><div class="dot" style="background:#185FA5"></div> Member total annual cost</span>
+    <span><div class="dot" style="background:#BA7517"></div> Non-member total annual cost</span>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="myChart"></canvas>
+  </div>
+
+  <p class="note">
+    <strong>Member cost</strong> = membership fee + (rounds &times; your retail ammo) + gun amortized + $50/yr maintenance.<br>
+    <strong>Non-member cost</strong> = sessions &times; (blended day pass + session ammo) &times; 1.10 tip. Day pass: $42 weekday / $52 weekend.<br>
+    Non-member ammo prices from YYZ posted rates. Member retail ammo from GTA estimates — adjust slider to match what you actually pay.
+    Gun amortized defaults to ~$800 &divide; 5 yrs = $160/yr. Set to $0 if you already own one.
+  </p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  const CALIBERS = [
+    { label: '.22 LR',    memberDefault: 15,  nonMember: 0.40, sliderMin: 10,  sliderMax: 30,  sliderStep: 2  },
+    { label: '9mm',       memberDefault: 50,  nonMember: 1.20, sliderMin: 35,  sliderMax: 70,  sliderStep: 5  },
+    { label: '.40 S&W',   memberDefault: 60,  nonMember: 1.40, sliderMin: 40,  sliderMax: 85,  sliderStep: 5  },
+    { label: '.45 ACP',   memberDefault: 75,  nonMember: 1.80, sliderMin: 50,  sliderMax: 110, sliderStep: 5  },
+    { label: '.223/5.56', memberDefault: 80,  nonMember: 2.00, sliderMin: 55,  sliderMax: 120, sliderStep: 5  },
+    { label: '.308/7.62', memberDefault: 150, nonMember: 3.60, sliderMin: 100, sliderMax: 220, sliderStep: 10 },
+  ];
+
+  const MEMBERSHIP_Y1 = 762.75;
+  const MEMBERSHIP_RENEWAL = 621.50;
+  const TIP = 1.10;
+  const WEEKDAY_PASS = 42;
+  const WEEKEND_PASS = 52;
+  const MAINTENANCE = 50;
+
+  let membershipYear = 1;
+  let selectedCaliber = 1;
+
+  function buildCaliberButtons() {
+    const row = document.getElementById('caliber-row');
+    CALIBERS.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'cal-btn' + (i === selectedCaliber ? ' active' : '');
+      btn.textContent = c.label;
+      btn.onclick = () => selectCaliber(i);
+      row.appendChild(btn);
+    });
+  }
+
+  function selectCaliber(i) {
+    selectedCaliber = i;
+    document.querySelectorAll('.cal-btn').forEach((b, j) => b.classList.toggle('active', j === i));
+    const cal = CALIBERS[i];
+    const sl = document.getElementById('ammo');
+    sl.min = cal.sliderMin;
+    sl.max = cal.sliderMax;
+    sl.step = cal.sliderStep;
+    sl.value = cal.memberDefault;
+    update();
+  }
+
+  function getInputs() {
+    return {
+      rps:          parseInt(document.getElementById('rps').value),
+      wkd:          parseInt(document.getElementById('wkd').value) / 100,
+      ammo:         parseInt(document.getElementById('ammo').value) / 100,
+      gun:          parseInt(document.getElementById('gun').value),
+      nonMemberAmmo: CALIBERS[selectedCaliber].nonMember,
+    };
+  }
+
+  function memberCost(rounds, { ammo, gun }) {
+    const fee = membershipYear === 1 ? MEMBERSHIP_Y1 : MEMBERSHIP_RENEWAL;
+    return fee + rounds * ammo + gun + MAINTENANCE;
+  }
+
+  function nonMemberCost(rounds, { rps, wkd, nonMemberAmmo }) {
+    const sessions = rounds / rps;
+    const blendedPass = wkd * WEEKEND_PASS + (1 - wkd) * WEEKDAY_PASS;
+    const sessionCost = (blendedPass + rps * nonMemberAmmo) * TIP;
+    return sessions * sessionCost;
+  }
+
+  function calcBreakEven(inputs) {
+    for (let r = 1; r <= 15000; r++) {
+      if (memberCost(r, inputs) <= nonMemberCost(r, inputs)) return r;
+    }
+    return null;
+  }
+
+  function setYear(y) {
+    membershipYear = y;
+    document.getElementById('yr1-btn').classList.toggle('active', y === 1);
+    document.getElementById('yr2-btn').classList.toggle('active', y === 2);
+    update();
+  }
+
+  let chart;
+  function initChart() {
+    chart = new Chart(document.getElementById('myChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: 'Member',     data: [], borderColor: '#185FA5', backgroundColor: 'rgba(24,95,165,0.07)', tension: 0.3, pointRadius: 0, fill: true, borderWidth: 2 },
+          { label: 'Non-member', data: [], borderColor: '#BA7517', backgroundColor: 'rgba(186,117,23,0.07)', tension: 0.3, pointRadius: 0, fill: true, borderWidth: 2 },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: 'index' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ' $' + Math.round(ctx.parsed.y).toLocaleString() } }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'rounds per year', font: { size: 12 }, color: '#888' },
+            ticks: { color: '#888', maxTicksLimit: 8, autoSkip: true },
+            grid: { color: 'rgba(128,128,128,0.1)' }
+          },
+          y: {
+            title: { display: true, text: 'total annual cost (CAD)', font: { size: 12 }, color: '#888' },
+            ticks: { color: '#888', callback: v => '$' + v.toLocaleString() },
+            grid: { color: 'rgba(128,128,128,0.1)' }
+          }
+        }
+      }
+    });
+  }
+
+  function update() {
+    const inputs = getInputs();
+    const cal = CALIBERS[selectedCaliber];
+
+    document.getElementById('rps-val').textContent = inputs.rps;
+    document.getElementById('wkd-val').textContent = Math.round(inputs.wkd * 100) + '%';
+    document.getElementById('ammo-val').textContent = Math.round(inputs.ammo * 100) + '¢';
+    document.getElementById('gun-val').textContent = '$' + inputs.gun;
+    document.getElementById('member-ammo-display').textContent = '$' + inputs.ammo.toFixed(2) + ' / round';
+    document.getElementById('nm-ammo-display').textContent = '$' + (cal.nonMember * TIP).toFixed(2) + ' / round (incl. tip)';
+
+    const maxRounds = 4000;
+    const step = 25;
+    const labels = [], mData = [], nmData = [];
+    for (let r = 0; r <= maxRounds; r += step) {
+      labels.push(r);
+      mData.push(Math.round(memberCost(r, inputs)));
+      nmData.push(Math.round(nonMemberCost(r, inputs)));
+    }
+
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = mData;
+    chart.data.datasets[1].data = nmData;
+    chart.update();
+
+    const be = calcBreakEven(inputs);
+    if (be) {
+      const sessions = Math.ceil(be / inputs.rps);
+      document.getElementById('be-rounds').textContent = be.toLocaleString();
+      document.getElementById('be-sessions').textContent = sessions;
+      document.getElementById('be-month').textContent = (sessions / 12).toFixed(1);
+    } else {
+      ['be-rounds','be-sessions','be-month'].forEach(id => document.getElementById(id).textContent = '> 15k');
+    }
+  }
+
+  ['rps','wkd','ammo','gun'].forEach(id =>
+    document.getElementById(id).addEventListener('input', update)
+  );
+
+  buildCaliberButtons();
+  initChart();
+  update();
+</script>
+</body>
+</html>
